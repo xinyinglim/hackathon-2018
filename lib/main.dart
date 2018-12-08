@@ -8,6 +8,8 @@ import 'package:hackathon_test/classes/user.dart';
 import 'package:hackathon_test/create/createDelivery.dart';
 import 'package:hackathon_test/auth.dart';
 import 'package:hackathon_test/classes/deliveryRequest.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: mapPageRoute,
       routes: {
-        mapPageRoute : (BuildContext context) => AuthPage(),
+        mapPageRoute : (BuildContext context) => MapsDemo(),
         currentOrdersRoute : (BuildContext context) => CurrentOrdersPage(),
       }
       // home: new MyHomePage(title: 'Flutter Demo Home Page'),
@@ -50,7 +52,9 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: CustomDrawer(context).build(),
-      body: Text("The map"),
+      //integrate Google Maps
+      body: MapsDemo(),
+     // body: Text("The map"),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.local_shipping),
         onPressed: (){
@@ -59,6 +63,55 @@ class _MapPageState extends State<MapPage> {
         },
       ),
     );
+  }
+}
+
+//Google Maps classes
+class MapsDemo extends StatefulWidget {
+  @override
+  State createState() => MapsDemoState();
+}
+
+class MapsDemoState extends State<MapsDemo> {
+
+  GoogleMapController mapController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(15.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Center(
+            child: SizedBox(
+              width: 300.0,
+              height: 200.0,
+              child: GoogleMap(
+                onMapCreated: _onMapCreated,
+              ),
+            ),
+          ),
+          RaisedButton(
+            child: const Text('Go to London'),
+            onPressed: mapController == null ? null : () {
+              mapController.animateCamera(CameraUpdate.newCameraPosition(
+                const CameraPosition(
+                  bearing: 270.0,
+                  target: LatLng(51.5160895, -0.1294527),
+                  tilt: 30.0,
+                  zoom: 17.0,
+                ),
+              ));
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() { mapController = controller; });
   }
 }
 
