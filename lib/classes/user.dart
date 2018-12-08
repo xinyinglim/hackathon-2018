@@ -123,10 +123,12 @@ class User {
   String name;
   // bool activeDriver;
   Address homeAddress;
+  String email;
 
   static String idFS = "id";
   static String homeAddressFS = "homeAddress";
   static String nameFS = "name";
+  static String emailFS = "email";
   // static String activeDriverFS = "activeDriver";
 
   User();
@@ -141,6 +143,7 @@ class User {
     nameFS : this.name,
     // activeDriverFS : this.activeDriver,
     homeAddressFS : this.homeAddress?.toMap(),
+    emailFS : this.email,
   };
 
   User.fromDocumentSnapshot (DocumentSnapshot snap){
@@ -148,6 +151,7 @@ class User {
     this.id = raw[idFS];
     this.homeAddress = Address.fromMap(raw[homeAddressFS].cast<String, dynamic>());
     this.name = raw[nameFS];
+    this.email = raw[emailFS];
     // this.activeDriver = raw[activeDriverFS];
   }
 }
@@ -221,6 +225,8 @@ class DeliveryRequest {
     //todo null should not be an option in production code
     this.deliveryStatusEnum = DeliveryStatusEnum.fromFirestoreString(map[deliveryStatusEnum]);
   }
+
+  DeliveryRequest();
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> result = {
