@@ -1,84 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import 'package:hackathon_test/helper/address.dart';
 
 
-class Address {
-  String line1FS = "line1";
-  String line2FS = "line2";
-  String kampungFS = "kampung";
-  String districtFS = "district";
-  String countryFS = "country";
-  String geoPointFS = "geoPoint";
 
-  String line1;
-  String line2; //optional
-  String kampung;
-  String district;
-  String country;
-  GeoPoint geoPoint;
-
-  Address();
-
-  Address.fromMap(Map<String, dynamic> map){
-    this.line1 = map[line1FS];
-    this.line2 = map[line2FS] ?? "";
-    this.kampung = map[kampungFS];//todo Kampung should be enum
-    this.district = map[districtFS];
-    this.country = map[countryFS];
-    this.geoPoint = map[geoPointFS];
-  }
-
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = {
-      line1FS : line1,
-      kampungFS : kampung,
-      districtFS : district,
-      countryFS : country,
-      geoPointFS : geoPoint,
-    };
-    if (line2 != "") map.addAll({line2FS : line2});
-    return map;
-  }
-
-  @override
-  String toString() => "$line1, ${line2 ?? ""}, $kampung, $district, $country";
-  
-}
-
-class Driver {
-  static String driverIDFS = "driverID";
-  static String nameFS = "name";
-  static String currentLocationFS = "currentLocation";
-  static String activeFS = "active";
-
-  DocumentReference ref; //todo add to everything
-  String driverID;
-  String name;
-  GeoPoint currentLocation; //only available if you are on activeDuty
-  bool active;
-  //bool busy/oncall
-  //todo connect to user id
-
-  Driver.fromDocumentSnapshot(DocumentSnapshot snap){
-    ref = snap.reference;
-    Map<String, dynamic> result = snap.data;
-    this.driverID = result[driverIDFS];
-    this.name = result[nameFS];
-    this.currentLocation = result[currentLocationFS];
-    this.active = result[activeFS];
-  }
-
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> result = {
-      driverIDFS : this.driverID,
-      nameFS : this.name,
-      currentLocationFS : this.currentLocation,
-      activeFS : this.active,
-    };
-    return result;
-
-  }
-
-}
 
 class User {
   static CollectionReference colRef = Firestore.instance.collection("users");

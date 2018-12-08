@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon_test/classes/user.dart';
 import 'createAddress.dart';
+import 'package:hackathon_test/helper/address.dart';
+
 class CreateUser extends StatefulWidget {
   String email;
   CreateUser(this.email);

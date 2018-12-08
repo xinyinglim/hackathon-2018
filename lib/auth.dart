@@ -5,6 +5,8 @@ import 'package:hackathon_test/classes/currentSession.dart';
 import 'package:hackathon_test/classes/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hackathon_test/create/createUser.dart';
+import 'dart:async';
+
 class AuthPage extends StatelessWidget {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;

@@ -10,7 +10,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.0.0-dev.55.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -19,7 +19,7 @@ dependencies:
   transparent_image: ^0.1.0
   firebase_auth: ^0.6.6
   google_sign_in: ^3.2.4
-  google_maps_flutter: ^0.0.3+3
+  google_maps_flutter: ^0.0.3
 
 
 

@@ -8,7 +8,9 @@ import 'package:hackathon_test/classes/user.dart';
 import 'package:hackathon_test/create/createDelivery.dart';
 import 'package:hackathon_test/auth.dart';
 import 'package:hackathon_test/classes/deliveryRequest.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'classes/driver.dart';
+import 'dart:core';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -111,6 +113,81 @@ class CustomDrawer {
   }
 }
 
+class DeliveryRequestListItem extends StatefulWidget {
+  DeliveryRequest deliveryRequest;
+  DeliveryRequestListItem(this.deliveryRequest);
+  _DeliveryRequestListItemState createState() => _DeliveryRequestListItemState();
+}
+
+class _DeliveryRequestListItemState extends State<DeliveryRequestListItem> {
+  User sender;
+  Courier courier;
+  
+  void initializeStreams(){
+    User.colRef.document(widget.deliveryRequest.senderID).snapshots().listen((onData){
+        setState(() {
+          this.sender = User.fromDocumentSnapshot(onData);
+                });
+    });
+    Courier.colRef.document(widget.deliveryRequest.driverID).snapshots().listen((onData){
+      this.courier = Courier.fromDocumentSnapshot(onData);
+    });
+
+  }
+
+  Widget get progressBar {
+    if (this.sender == null|| this.courier == null) return Text("Retrieving data...");
+    switch (widget.deliveryRequest.deliveryStatusEnum.currentEnum){
+      case DeliveryStatus.FindingDrivers:
+        return LinearProgressIndicator(value: 0.0);
+      case DeliveryStatus.AwaitingPickup:
+        return LinearProgressIndicator(value: 0.1);
+      case DeliveryStatus.OnItsWay:
+        // num value = (currentDistance/totalDistance*9/10 )
+        return LinearProgressIndicator(value : 0.5);
+      case DeliveryStatus.Delivered:
+        return LinearProgressIndicator(value : 1.0);
+      case DeliveryStatus.Cancelled:
+        return Text("Cancelled",style: TextStyle(color:Colors.red));//todo add cancelled time
+
+    }
+  }
+
+  String formattedDate (DateTime dateTime){
+    bool isSameDay(DateTime a, DateTime b){
+      if (a.day == b.day && a.month == b.month && a.year == b.year) return true; else return false;
+    }
+    DateTime today = DateTime.now();
+    Duration difference = dateTime.difference(today);
+    if (isSameDay(dateTime, today)){
+      if (difference.inHours < 1){
+        return difference.inMinutes.toString() + " mins";
+      }else {
+        return difference.inHours.toString() + " hrs";
+      }
+
+    } else {
+      if (difference.inHours < 24) {
+        return difference.inHours.toString() + " hrs";
+      } else {
+      return difference.inDays.toString() + " days";
+      }
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Text(widget.deliveryRequest.deliveryStatusEnum.displayString),
+      title: Text("${courier.name}, ${widget.deliveryRequest.pickupAddress.kampung} to ${widget.deliveryRequest.recipientAddress.kampung}"),
+      subtitle: progressBar,
+      trailing: Text(formattedDate(widget.deliveryRequest.estimatedArrivalTime)),
+    );
+  }
+}
+
+
+
 class CurrentOrdersPage extends StatefulWidget {
   _CurrentOrdersPageState createState() => _CurrentOrdersPageState();
 }
@@ -118,7 +195,25 @@ class CurrentOrdersPage extends StatefulWidget {
 class _CurrentOrdersPageState extends State<CurrentOrdersPage> {
   @override
   Widget build(BuildContext context) {
-    return Text("A Listview of all valid items");
+    return StreamBuilder(
+      stream: DeliveryRequest.colRef.where(DeliveryRequest.senderIDFS,isEqualTo: CurrentSession.currentUser.id).snapshots(),
+      builder: (context, AsyncSnapshot asyncSnap) {
+        if (!asyncSnap.hasData) {
+          return Center (child: Text("No Orders being sent!"));
+        }
+        List<DocumentSnapshot> docList = asyncSnap.data;
+        List<DeliveryRequest> list = docList.map((snap) => DeliveryRequest.fromDocumentSnapshot(snap));
+        return ListView.builder(
+          itemCount: list.length * 2 - 1,
+          itemBuilder: (context, index) {
+            if (index.isOdd) return Divider();
+            int i = index ~/ 2;
+            DeliveryRequest currentRequest = list[i];
+            return DeliveryRequestListItem(currentRequest);
+          },
+        );
+      },
+    );
   }
 }
 
@@ -219,62 +314,3 @@ class _MyHomePageState extends State<MyHomePage> {
 
 }
 
-class FruitCard extends StatefulWidget {
-  Fruit fruit;
-  FruitCard(this.fruit);
-  @override
-  _FruitCardState createState() => _FruitCardState();
-}
-
-class _FruitCardState extends State<FruitCard> {
-
-Widget _showProfilePicture() {
-    return FadeInImage.memoryNetwork(
-      placeholder: kTransparentImage,
-      image: widget.fruit.image,
-      fit: BoxFit.cover,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child :
-        Column(
-          children: [
-            // _showProfilePicture,
-            ListTile(
-              title: Text(widget.fruit.fruitName),
-              trailing: Text("${widget.fruit.qty} pcs"),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    setState((){
-                      widget.fruit.qty += 1;
-                      TestObjects().fruits.forEach((fruit){
-                          debugPrint(fruit.toString());
-                      });
-                      });
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: ((){
-                    setState(() {
-                      widget.fruit.qty -= 1;
-                      TestObjects().fruits.forEach((fruit){
-                          debugPrint(fruit.toString());
-                      });});
-                  }),
-                )
-              ],
-            )
-          ]
-        ),
-    );
-  }
-}

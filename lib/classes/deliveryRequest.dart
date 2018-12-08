@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hackathon_test/helper/firestoreEnum.dart';
+import 'package:hackathon_test/helper/address.dart';
+
 enum DeliveryStatus {FindingDrivers, AwaitingPickup, OnItsWay, Delivered, Cancelled}
 
 class DeliveryStatusEnum extends FirestoreEnum<DeliveryStatus> {
+
+
 
   @override
   Map<DeliveryStatus, String> get enumToFirestore => {
@@ -28,8 +32,10 @@ class DeliveryStatusEnum extends FirestoreEnum<DeliveryStatus> {
 }
 
 class DeliveryRequest {
+
+  static CollectionReference colRef = Firestore.instance.collection("deliveryRequests");
   static String deliveryIDFS = "deliveryID";
-  static String driverIDFS = "driverID";
+  static String courierIDFS = "courierID";
   static String senderIDFS = "senderID";
   static String recipientConfirmationCodeFS = "recipientConfirmationCode";
   static String parcelIDFS = "parcelID";
@@ -39,6 +45,8 @@ class DeliveryRequest {
   static String estimatedPickupTimeFS = "actualPickupTime";
   static String actualPickupTimeFS = "actualPickupTime";
   static String deliveryStatusEnumFS = "deliveryStatusEnum";
+  static String pickupAddressFS = "pickupAddress";
+  static String recipientAddressFS = "recipientAddress";
 
   DocumentReference ref;
   String deliveryID;
@@ -52,12 +60,14 @@ class DeliveryRequest {
   DateTime estimatedPickupTime;
   DateTime actualPickupTime;
   DeliveryStatusEnum deliveryStatusEnum;
+  Address recipientAddress;
+  Address pickupAddress; //pickup from sender or otherwise
 
   DeliveryRequest.fromDocumentSnapshot(DocumentSnapshot snap){
     this.ref = snap.reference;
     Map<String, dynamic> map = snap.data;
     this.deliveryID = map[deliveryIDFS];
-    this.driverID = map[driverIDFS];
+    this.driverID = map[courierIDFS];
     this.senderID = map[senderIDFS];
     this.recipientConfirmationCode = map[recipientConfirmationCodeFS];
     this.parcelID = map[parcelIDFS];
@@ -68,6 +78,8 @@ class DeliveryRequest {
     this.actualPickupTime = (map[actualPickupTimeFS] == null) ? null : DateTime.fromMillisecondsSinceEpoch(int.parse(map[actualPickupTimeFS].toString()));
     //todo null should not be an option in production code
     this.deliveryStatusEnum = DeliveryStatusEnum.fromFirestoreString(map[deliveryStatusEnum]);
+    this.recipientAddress = Address.fromMap(map[recipientAddressFS]);
+    this.pickupAddress = Address.fromMap(map[pickupAddress]);
   }
 
   DeliveryRequest();
@@ -75,7 +87,7 @@ class DeliveryRequest {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> result = {
       deliveryIDFS : deliveryID,
-      driverIDFS : driverID,
+      courierIDFS : driverID,
       senderIDFS : senderID,
       recipientConfirmationCodeFS : recipientConfirmationCode,
       parcelIDFS : parcelID,

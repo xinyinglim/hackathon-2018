@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon_test/classes/user.dart';//todo split up address later
+import 'package:hackathon_test/classes/user.dart';
+import 'package:hackathon_test/helper/address.dart';
+
 
 class CreateAddress extends StatefulWidget {
   Function callback;
