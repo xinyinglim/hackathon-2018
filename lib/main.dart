@@ -8,6 +8,7 @@ import 'package:hackathon_test/classes/user.dart';
 import 'package:hackathon_test/create/createDelivery.dart';
 import 'package:hackathon_test/auth.dart';
 import 'package:hackathon_test/classes/deliveryRequest.dart';
+
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -50,7 +51,19 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: CustomDrawer(context).build(),
-      body: Text("The map"),
+      body: Column(
+  children: <Widget>[
+    Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {},
+      ),
+    ),
+  ],
+      ),
+
+
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.local_shipping),
         onPressed: (){
