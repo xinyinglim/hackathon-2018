@@ -85,14 +85,30 @@ class MapsDemoState extends State<MapsDemo> {
       Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: GoogleMap(
-            onMapCreated: (GoogleMapController controller) {
-              
+        child: GoogleMap(          
+            onMapCreated: (GoogleMapController controller) {              
               mapController = controller;
-            },
+               mapController.addMarker(
+                MarkerOptions(
+                  position: LatLng(4.901934,114.9163313), //show Progresif HQ
+                  infoWindowText: InfoWindowText("Origin", "Pick up parcel here"),
+                ),                
+              );  
+              
+              mapController.addMarker(
+                MarkerOptions(
+/*                NOTE: For some reason marker doesn't appear if you choose a position that corresponds to that 
+                  of a named building/landmark e.g. Maktab Duli */
+                  position: LatLng(4.901934,114.9131383), //show unnamed place near Maktab Duli
+                  infoWindowText: InfoWindowText("Destination", "Send parcel here"),  
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                ),                
+              );  
+            },     
+                               
             options: GoogleMapOptions(
               cameraPosition: CameraPosition(
-                target: LatLng(4.901934,114.9163313),
+                target: LatLng(4.901934,114.9163313), //camera centres on Progresif HQ by default
                 zoom: 17.0,
                 tilt: 30.0,
                 bearing: 270.0,
@@ -108,12 +124,6 @@ class MapsDemoState extends State<MapsDemo> {
     onPressed: () {
       //todo make new new shipping order
       Navigator.push(context, new MaterialPageRoute( builder: (context) => new CreateDelivery(null)));
-/*     mapController.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-            target: LatLng(37.4219999, -122.0862462), zoom: 20.0),
-      ),
-    ); */
   }),
 );
 /*     return Column(
