@@ -111,13 +111,14 @@ class Driver {
       currentLocationFS : this.currentLocation,
       activeFS : this.active,
     };
-
+    return result;
 
   }
 
 }
 
 class User {
+  static CollectionReference colRef = Firestore.instance.collection("users");
   String id;  //id is a string, and you can tell others your id and they can find you and use your home address. Assume immutable
   String name;
   // bool activeDriver;
@@ -129,6 +130,11 @@ class User {
   // static String activeDriverFS = "activeDriver";
 
   User();
+
+  Future<void> createInFirestore() async {
+    if (this.id == null) throw ArgumentError("No id found");
+    colRef.document(this.id).setData(this.toMap());
+  }
 
   Map<String, dynamic> toMap() => {
     idFS : this.id,

@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.hackathontest">
+ 
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -35,5 +36,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+           <meta-data
+        android:name="com.google.android.geo.AIzaSyBdNQMK3lD6PZd7cIBKRb1POJ2KvAEI2x8"
+        android:value="AIzaSyBdNQMK3lD6PZd7cIBKRb1POJ2KvAEI2x8"/>
+
     </application>
 </manifest>

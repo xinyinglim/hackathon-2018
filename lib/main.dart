@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'create/createUser.dart';
+import 'package:hackathon_test/classes/user.dart';
+import 'package:hackathon_test/create/createDelivery.dart';
 
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  static String mapPageRoute = "/mapPage";
+  static String currentOrdersRoute = "/currentOrders";
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -22,12 +27,92 @@ class MyApp extends StatelessWidget {
         // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: Colors.blue,
+        
       ),
-      home: CreateUser(),
+      initialRoute: mapPageRoute,
+      routes: {
+        mapPageRoute : (BuildContext context) => MapPage(),
+        currentOrdersRoute : (BuildContext context) => CurrentOrdersPage(),
+      }
       // home: new MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
+
+class MapPage extends StatefulWidget {
+  _MapPageState createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: CustomDrawer(context).build(),
+      body: Text("The map"),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.local_shipping),
+        onPressed: (){
+          //todo make new new shipping order
+          Navigator.push(context, new MaterialPageRoute( builder: (context) => CreateDelivery(new DeliveryRequest())));
+        },
+      ),
+    );
+  }
+}
+
+class CurrentSession {
+  //todo implement Login
+  static User currentUser;
+}
+
+class CustomDrawer {
+  BuildContext context;
+
+  CustomDrawer(this.context);
+  Widget build(){
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget> [
+          DrawerHeader(
+            child: Text(CurrentSession.currentUser.name),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            )
+          ),
+          ListTile(
+            title: Text("Map View"),
+            onTap: (){
+              Navigator.pushReplacementNamed(context, MyApp.mapPageRoute);
+              // Navigator.pop(context);//test this
+            }
+          )
+        ]
+      )
+    );
+  }
+}
+
+class CurrentOrdersPage extends StatefulWidget {
+  _CurrentOrdersPageState createState() => _CurrentOrdersPageState();
+}
+
+class _CurrentOrdersPageState extends State<CurrentOrdersPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Text("A Listview of all valid items");
+  }
+}
+
+// class PreviousOrdersPage extends StatefulWidget {
+//    PreviousOrdersPageState createState() =>  PreviousOrdersPageState();
+// }
+
+
+
+
+
+
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -53,34 +138,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-  Widget buildListView(){
+  // Widget buildListView(){
 
-    // return Center(
-    //           child: FadeInImage.memoryNetwork(
-    //             placeholder: kTransparentImage,
-    //             image:
-    //                 'https://github.com/flutter/website/blob/master/src/_includes/code/layout/lakes/images/lake.jpg?raw=true',
-    //           ),
-    //         );
+  //   // return Center(
+  //   //           child: FadeInImage.memoryNetwork(
+  //   //             placeholder: kTransparentImage,
+  //   //             image:
+  //   //                 'https://github.com/flutter/website/blob/master/src/_includes/code/layout/lakes/images/lake.jpg?raw=true',
+  //   //           ),
+  //   //         );
 
 
-      return StreamBuilder(
-        stream: Firestore.instance.collection("fruits").snapshots(),
-        builder: (context, AsyncSnapshot asyncSnap){
-          if (!asyncSnap.hasData) return CircularProgressIndicator();
-          QuerySnapshot query = asyncSnap.data;
-          List<Fruit> fruitList = query.documents.map((doc) => Fruit.fromSnap(doc)).toList();
-          if (fruitList.isEmpty) {return Center(child: Text("All out"));}
-          return ListView.builder(
-        itemCount: fruitList.length,
-        itemBuilder: (context, index){
-          return FruitCard(fruitList[index]);
-        },
-      );
-        },
-      );
+  //     return StreamBuilder(
+  //       stream: Firestore.instance.collection("fruits").snapshots(),
+  //       builder: (context, AsyncSnapshot asyncSnap){
+  //         if (!asyncSnap.hasData) return CircularProgressIndicator();
+  //         QuerySnapshot query = asyncSnap.data;
+  //         List<Fruit> fruitList = query.documents.map((doc) => Fruit.fromSnap(doc)).toList();
+  //         if (fruitList.isEmpty) {return Center(child: Text("All out"));}
+  //         return ListView.builder(
+  //       itemCount: fruitList.length,
+  //       itemBuilder: (context, index){
+  //         return FruitCard(fruitList[index]);
+  //       },
+  //     );
+  //       },
+  //     );
       
-    }
+  //   }
 
 
   @override
@@ -100,11 +185,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: new Text(widget.title),
       ),
+
       body: Column(
         children: [
           Container(
             height: 400.0,
-            child: buildListView(),
+            child: Text("Not really used"),//buildListView(),
           )
         ]
       )

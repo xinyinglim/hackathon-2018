@@ -18,7 +18,7 @@ class _CreateUserState extends State<CreateUser> {
   }
 
   User currentUser = User();
-
+  bool invalidUserID = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +36,30 @@ class _CreateUserState extends State<CreateUser> {
                children: <Widget>[
                  TextFormField(
                    decoration: const InputDecoration(
+                     labelText: "ID",
+                      hintText: "Your unique user ID"
+                   ),
+                   onFieldSubmitted: (value) async {
+                    DocumentSnapshot snap = await User.colRef.document(value).get();
+                    if (!snap.exists) {
+                      this.invalidUserID = true;
+                      var dialog = AlertDialog(
+                        title: Text ("Invalid User ID, please choose another one"),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text("Okay"),
+                            onPressed: (){},
+                          )
+                        ],
+                      );
+                      showDialog(context: context, child: dialog);
+                    } else {
+                      this.invalidUserID = false;
+                    }
+                   },
+                 ),
+                 TextFormField(
+                   decoration: const InputDecoration(
                      labelText: "Name",
                       border: const OutlineInputBorder(),
                    ),
@@ -50,22 +74,23 @@ class _CreateUserState extends State<CreateUser> {
                   ListTile( leading: Text("Delivery Address"), title: FlatButton(
                     child: Text("Find your Address"),
                     onPressed: (){
+                      void callback (Address newAddress) {
+                        currentUser.homeAddress = newAddress;
+                      }//create address should return an address
                       Navigator.of(context).push(
-                        new MaterialPageRoute(builder: (context) => new CreateAddress())
+                        new MaterialPageRoute(builder: (context) => new CreateAddress(callback))
                       );
                     }//Navigator.push,
                   ),),
                  
-               
                  Padding(
                    padding: const EdgeInsets.symmetric(vertical: 16.0),
                    child: RaisedButton(
                      child: Text('Submit'),
                      onPressed: (){
-                       if (_formKey.currentState.validate()){
+                       if (_formKey.currentState.validate() && invalidUserID){
                          _formKey.currentState.save();
-                         Firestore.instance.collection("users").document(this.currentUser.name).setData(this.currentUser.toMap());
-    
+                         User.colRef.document(this.currentUser.name).setData(this.currentUser.toMap());
                        }
                      }
                    ),
