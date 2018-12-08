@@ -85,6 +85,7 @@ class _CreateAddressState extends State<CreateAddress> {
     FlatButton(
       child: Text("Save"),
       onPressed: (){
+        _formKey.currentState.save();
         widget.callback(this.currentAddress);//this widget should return a currentAddress
         // Navigator.pop(context);
       },

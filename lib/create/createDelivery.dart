@@ -23,7 +23,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
             child: Text("Next"),
             onPressed: (){
               Function callback(Address address){
-                this.startAddress = address;
+                setState(() { this.startAddress = address; });                
               }
               SimpleDialog dialog = SimpleDialog(
                 title: CreateAddress(callback),
@@ -58,7 +58,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
   String testing = "placeholder";
   Function callback(Address address){
     setState(() {
-          testing = address.toString();
+          testing = address.toString();          
         });
   }
 }
