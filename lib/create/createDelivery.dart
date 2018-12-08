@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hackathon_test/create/createAddress.dart';
 import 'package:hackathon_test/classes/user.dart';
-
+import 'package:hackathon_test/classes/deliveryRequest.dart';
 class CreateDelivery extends StatefulWidget {
   DeliveryRequest deliveryRequest;  
   CreateDelivery (this.deliveryRequest);
@@ -22,20 +22,44 @@ class _CreateDeliveryState extends State<CreateDelivery> {
           FlatButton(
             child: Text("Next"),
             onPressed: (){
-              Function callback(){}
+              Function callback(Address address){
+                this.startAddress = address;
+              }
               SimpleDialog dialog = SimpleDialog(
-                children: [CreateAddress(callback)],
+                title: CreateAddress(callback),
+                children: <Widget>[
+                  FlatButton(
+                    child: Text("Save Address"),
+                    onPressed: (){
+                      // if (this.dialog)//TODO
+                    },
+                  )],
+                
                 
               );
-              showDialog(child: dialog, barrierDismissible: false);
+              showDialog(child: dialog, barrierDismissible: false,
+              );
               //todo
               //Navigator.pushReplacement(context, )
             },
           )
         ],
       ),
-      body: Text("Section1"),
+      body: Column(
+        children: <Widget>[
+          Text(testing),
+          CreateAddress(callback)
+        ],
+      )//Text("Section1"),
     );
+  }
+
+
+  String testing = "placeholder";
+  Function callback(Address address){
+    setState(() {
+          testing = address.toString();
+        });
   }
 }
 
@@ -50,7 +74,6 @@ class _CreateDelivery2State extends State<CreateDelivery2> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Select Pickup Location"),
-
       ),
       body: Text("Pickup Location"),
     );

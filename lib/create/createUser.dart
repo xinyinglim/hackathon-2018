@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hackathon_test/classes/user.dart';
 import 'createAddress.dart';
 class CreateUser extends StatefulWidget {
+  String email;
+  CreateUser(this.email);
   _CreateUserState createState() => _CreateUserState();
 }
 
@@ -16,8 +18,17 @@ class _CreateUserState extends State<CreateUser> {
       );
      }
   }
+    User currentUser;
 
-  User currentUser = User();
+
+  @override
+  initState(){
+    super.initState();
+    currentUser = User.data(
+    null,null,null,widget.email
+    );
+  }
+
   bool invalidUserID = false;
   @override
   Widget build(BuildContext context) {

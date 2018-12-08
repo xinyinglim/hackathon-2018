@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'create/createUser.dart';
+import 'classes/currentSession.dart';
 import 'package:hackathon_test/classes/user.dart';
 import 'package:hackathon_test/create/createDelivery.dart';
-
+import 'package:hackathon_test/auth.dart';
+import 'package:hackathon_test/classes/deliveryRequest.dart';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: mapPageRoute,
       routes: {
-        mapPageRoute : (BuildContext context) => MapPage(),
+        mapPageRoute : (BuildContext context) => AuthPage(),
         currentOrdersRoute : (BuildContext context) => CurrentOrdersPage(),
       }
       // home: new MyHomePage(title: 'Flutter Demo Home Page'),
@@ -53,17 +55,14 @@ class _MapPageState extends State<MapPage> {
         child: Icon(Icons.local_shipping),
         onPressed: (){
           //todo make new new shipping order
-          Navigator.push(context, new MaterialPageRoute( builder: (context) => CreateDelivery(new DeliveryRequest())));
+          Navigator.push(context, new MaterialPageRoute( builder: (context) => new CreateDelivery(null)));
         },
       ),
     );
   }
 }
 
-class CurrentSession {
-  //todo implement Login
-  static User currentUser;
-}
+
 
 class CustomDrawer {
   BuildContext context;
@@ -85,6 +84,12 @@ class CustomDrawer {
             onTap: (){
               Navigator.pushReplacementNamed(context, MyApp.mapPageRoute);
               // Navigator.pop(context);//test this
+            }
+          ),
+          ListTile(
+            title: Text("Custom Order"),
+            onTap: () {
+              Navigator.pushReplacementNamed(context, MyApp.currentOrdersRoute);
             }
           )
         ]
