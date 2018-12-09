@@ -54,12 +54,35 @@ class _CreateDeliveryState extends State<CreateDelivery> {
         actions: <Widget>[
           FlatButton(
             child: Text("Next"),
+<<<<<<< HEAD
             onPressed: () {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
                           CreateDelivery2(widget.deliveryRequest)));
+=======
+            onPressed: (){
+              Function callback(Address address){
+                setState(() { this.startAddress = address; });                
+              }
+              SimpleDialog dialog = SimpleDialog(
+                title: CreateAddress(callback),
+                children: <Widget>[
+                  FlatButton(
+                    child: Text("Save Address"),
+                    onPressed: (){
+                      // if (this.dialog)//TODO
+                    },
+                  )],
+                
+                
+              );
+              showDialog(child: dialog, barrierDismissible: false,
+              );
+              //todo
+              //Navigator.pushReplacement(context, )
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
             },
           )
         ],
@@ -106,8 +129,13 @@ class _CreateDeliveryState extends State<CreateDelivery> {
   String testing = "placeholder";
   Function callback(Address address) {
     setState(() {
+<<<<<<< HEAD
       testing = address.toString();
     });
+=======
+          testing = address.toString();          
+        });
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
   }
 }
 

@@ -9,9 +9,12 @@ import 'package:hackathon_test/create/createDelivery.dart';
 import 'package:hackathon_test/auth.dart';
 import 'package:hackathon_test/classes/deliveryRequest.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+<<<<<<< HEAD
 import 'classes/driver.dart';
 import 'dart:core';
 import 'dart:async';
+=======
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
 
 void main() => runApp(new MyApp());
 
@@ -23,6 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+<<<<<<< HEAD
         title: 'Flutter Demo',
         theme: new ThemeData(
           // This is the theme of your application.
@@ -94,6 +98,27 @@ class MapsDemoState extends State<MapsDemo> {
           ),
         ),
       ],
+=======
+      title: 'Flutter Demo',
+      theme: new ThemeData(
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
+        // counter didn't reset back to zero; the application is not restarted.
+        primarySwatch: Colors.blue,
+        
+      ),
+      initialRoute: mapPageRoute,
+      routes: {
+        mapPageRoute : (BuildContext context) => MapsDemo(),
+        currentOrdersRoute : (BuildContext context) => CurrentOrdersPage(),
+      }
+      // home: new MyHomePage(title: 'Flutter Demo Home Page'),
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
     );
 
 //                mapController.addMarker(
@@ -147,6 +172,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+<<<<<<< HEAD
   static GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   _MapPageState() {}
@@ -184,13 +210,21 @@ class _MapPageState extends State<MapPage> {
       }
     });
   }
+=======
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       drawer: CustomDrawer(context).build(),
+<<<<<<< HEAD
       body: MapsDemo(),
+=======
+      //integrate Google Maps
+      body: MapsDemo(),
+     // body: Text("The map"),
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.local_shipping),
         onPressed: () {
@@ -206,6 +240,96 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
+<<<<<<< HEAD
+=======
+//Google Maps classes
+class MapsDemo extends StatefulWidget {
+  @override
+  State createState() => MapsDemoState();
+}
+
+class MapsDemoState extends State<MapsDemo> {
+
+  GoogleMapController mapController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+  body: Column(
+    children: <Widget>[
+      Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: GoogleMap(          
+            onMapCreated: (GoogleMapController controller) {              
+              mapController = controller;
+               mapController.addMarker(
+                MarkerOptions(
+                  position: LatLng(4.901934,114.9163313), //show Progresif HQ
+                  infoWindowText: InfoWindowText("Origin", "Pick up parcel here"),
+                ),                
+              );  
+              
+              mapController.addMarker(
+                MarkerOptions(
+/*                NOTE: For some reason marker doesn't appear if you choose a position that corresponds to that 
+                  of a named building/landmark e.g. Maktab Duli */
+                  position: LatLng(4.901934,114.9131383), //show unnamed place near Maktab Duli
+                  infoWindowText: InfoWindowText("Destination", "Send parcel here"),  
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                ),                
+              );  
+            },     
+                               
+            options: GoogleMapOptions(
+              cameraPosition: CameraPosition(
+                target: LatLng(4.901934,114.9163313), //camera centres on Progresif HQ by default
+                zoom: 17.0,
+                tilt: 30.0,
+                bearing: 270.0,
+              ),
+              myLocationEnabled: true,
+            ),
+       ),
+      ),
+    ],
+  ),
+  floatingActionButton: FloatingActionButton(
+    child: Icon(Icons.local_shipping),
+    onPressed: () {
+      //todo make new new shipping order
+      Navigator.push(context, new MaterialPageRoute( builder: (context) => new CreateDelivery(null)));
+  }),
+);
+/*     return Column(
+      children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: GoogleMap(
+            onMapCreated: (GoogleMapController controller) {},
+            options: GoogleMapOptions(
+              cameraPosition: CameraPosition(
+                target: LatLng(4.901934,114.9163313),
+                zoom: 17.0,
+                tilt: 30.0,
+                bearing: 270.0,
+              ),
+              myLocationEnabled: true,
+            ),
+          ),
+        ),
+      ],
+    ); */
+     
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() { mapController = controller; });
+  }
+}
+ 
+>>>>>>> 911beafbb8ff029db0ddcf5a9d42902823c9040d
 class CustomDrawer {
   BuildContext context;
 
