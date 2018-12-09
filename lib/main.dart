@@ -11,6 +11,7 @@ import 'package:hackathon_test/classes/deliveryRequest.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'classes/driver.dart';
 import 'dart:core';
+import 'dart:async';
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -36,11 +37,114 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: mapPageRoute,
       routes: {
-        mapPageRoute : (BuildContext context) => AuthPage(),
+        mapPageRoute : (BuildContext context) => MapPage(),
         currentOrdersRoute : (BuildContext context) => CurrentOrdersPage(),
       }
       // home: new MyHomePage(title: 'Flutter Demo Home Page'),
     );
+  }
+}
+
+class MapsDemo extends StatefulWidget {
+  @override
+  State createState() => MapsDemoState();
+}
+
+class MapsDemoState extends State<MapsDemo> {
+  // Map<String, Marker> mapOf
+  List<Courier> courierList = [];
+
+  GoogleMapController mapController;
+  
+
+  MapsDemoState(){
+   
+      
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    return 
+   Column(
+    children: <Widget>[
+      Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: GoogleMap(          
+            onMapCreated: (GoogleMapController controller) {              
+           controller.clearMarkers();//todo not very efficient, keeps clearning and readding everything
+          courierList.forEach((driver) async{
+            this.mapController.addMarker(
+              MarkerOptions(
+                position: LatLng(driver.currentLocation.latitude, driver.currentLocation.longitude),
+               icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+              )
+            );
+            // debugPrint("lattitude: ${driver.currentLocation.latitude}");
+          });
+          //todo implement the 10m thing
+          //map will update time ever 10s in the future, otherwise there will be a lot of updates
+
+        },
+        options: GoogleMapOptions(
+              cameraPosition: CameraPosition(
+                target: LatLng(4.901934,114.9163313), //camera centres on Progresif HQ by default
+                zoom: 17.0,
+                tilt: 0.0,
+                bearing: 270.0,
+              ),
+              myLocationEnabled: true,
+          ),
+        ),
+      ),
+    ],
+  );
+  
+//                mapController.addMarker(
+//                 MarkerOptions(
+//                   position: LatLng(4.901934,114.9163313), //show Progresif HQ
+//                   infoWindowText: InfoWindowText("Origin", "Pick up parcel here"),
+//                 ),                
+//               );  
+              
+//               mapController.addMarker(
+//                 MarkerOptions(
+                  
+// /*                NOTE: For some reason marker doesn't appear if you choose a position that corresponds to that 
+//                   of a named building/landmark e.g. Maktab Duli */
+//                   position: LatLng(4.901934,114.9131383), //show unnamed place near Maktab Duli
+//                   infoWindowText: InfoWindowText("Destination", "Send parcel here"),  
+//                   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+//                 ),   
+        
+                
+                               
+
+/*     return Column(
+      children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: GoogleMap(
+            onMapCreated: (GoogleMapController controller) {},
+            options: GoogleMapOptions(
+              cameraPosition: CameraPosition(
+                target: LatLng(4.901934,114.9163313),
+                zoom: 17.0,
+                tilt: 30.0,
+                bearing: 270.0,
+              ),
+              myLocationEnabled: true,
+            ),
+          ),
+        ),
+      ],
+    ); */
+     
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() { mapController = controller; });
   }
 }
 
@@ -53,19 +157,7 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: CustomDrawer(context).build(),
-      body: Column(
-  children: <Widget>[
-    Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: GoogleMap(
-        onMapCreated: (GoogleMapController controller) {},
-      ),
-    ),
-  ],
-      ),
-
-
+      body:MapsDemo(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.local_shipping),
         onPressed: (){
@@ -89,7 +181,7 @@ class CustomDrawer {
         padding: EdgeInsets.zero,
         children: <Widget> [
           DrawerHeader(
-            child: Text(CurrentSession.currentUser.name),
+            child: Text(CurrentSession.currentUser?.name ?? "Not Logged In"),
             decoration: BoxDecoration(
               color: Colors.blue,
             )
@@ -187,7 +279,6 @@ class _DeliveryRequestListItemState extends State<DeliveryRequestListItem> {
 }
 
 
-
 class CurrentOrdersPage extends StatefulWidget {
   _CurrentOrdersPageState createState() => _CurrentOrdersPageState();
 }
@@ -195,14 +286,15 @@ class CurrentOrdersPage extends StatefulWidget {
 class _CurrentOrdersPageState extends State<CurrentOrdersPage> {
   @override
   Widget build(BuildContext context) {
+    // if (CurrentSession.currentUser == null) return Scaffold(drawer: CustomDrawer(context).build(), body: Center(child: Text("You are not logged in")));
     return StreamBuilder(
-      stream: DeliveryRequest.colRef.where(DeliveryRequest.senderIDFS,isEqualTo: CurrentSession.currentUser.id).snapshots(),
+      stream: DeliveryRequest.colRef.where(DeliveryRequest.senderIDFS,isEqualTo: "xinying").snapshots(),
       builder: (context, AsyncSnapshot asyncSnap) {
         if (!asyncSnap.hasData) {
           return Center (child: Text("No Orders being sent!"));
         }
-        List<DocumentSnapshot> docList = asyncSnap.data;
-        List<DeliveryRequest> list = docList.map((snap) => DeliveryRequest.fromDocumentSnapshot(snap));
+        List<DocumentSnapshot> docList = asyncSnap.data.documents;
+        List<DeliveryRequest> list = docList.map((snap) => DeliveryRequest.fromDocumentSnapshot(snap)).toList();
         return ListView.builder(
           itemCount: list.length * 2 - 1,
           itemBuilder: (context, index) {
@@ -227,90 +319,89 @@ class _CurrentOrdersPageState extends State<CurrentOrdersPage> {
 
 
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+// class MyHomePage extends StatefulWidget {
+//   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+//   // This widget is the home page of your application. It is stateful, meaning
+//   // that it has a State object (defined below) that contains fields that affect
+//   // how it looks.
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+//   // This class is the configuration for the state. It holds the values (in this
+//   // case the title) provided by the parent (in this case the App widget) and
+//   // used by the build method of the State. Fields in a Widget subclass are
+//   // always marked "final".
 
-  final String title;
+//   final String title;
 
-  @override
-  _MyHomePageState createState() => new _MyHomePageState();
-}
+//   @override
+//   _MyHomePageState createState() => new _MyHomePageState();
+// }
 
-class _MyHomePageState extends State<MyHomePage> {
-
-
+// class _MyHomePageState extends State<MyHomePage> {
 
 
 
-  // Widget buildListView(){
-
-  //   // return Center(
-  //   //           child: FadeInImage.memoryNetwork(
-  //   //             placeholder: kTransparentImage,
-  //   //             image:
-  //   //                 'https://github.com/flutter/website/blob/master/src/_includes/code/layout/lakes/images/lake.jpg?raw=true',
-  //   //           ),
-  //   //         );
 
 
-  //     return StreamBuilder(
-  //       stream: Firestore.instance.collection("fruits").snapshots(),
-  //       builder: (context, AsyncSnapshot asyncSnap){
-  //         if (!asyncSnap.hasData) return CircularProgressIndicator();
-  //         QuerySnapshot query = asyncSnap.data;
-  //         List<Fruit> fruitList = query.documents.map((doc) => Fruit.fromSnap(doc)).toList();
-  //         if (fruitList.isEmpty) {return Center(child: Text("All out"));}
-  //         return ListView.builder(
-  //       itemCount: fruitList.length,
-  //       itemBuilder: (context, index){
-  //         return FruitCard(fruitList[index]);
-  //       },
-  //     );
-  //       },
-  //     );
+//   // Widget buildListView(){
+
+//   //   // return Center(
+//   //   //           child: FadeInImage.memoryNetwork(
+//   //   //             placeholder: kTransparentImage,
+//   //   //             image:
+//   //   //                 'https://github.com/flutter/website/blob/master/src/_includes/code/layout/lakes/images/lake.jpg?raw=true',
+//   //   //           ),
+//   //   //         );
+
+
+//   //     return StreamBuilder(
+//   //       stream: Firestore.instance.collection("fruits").snapshots(),
+//   //       builder: (context, AsyncSnapshot asyncSnap){
+//   //         if (!asyncSnap.hasData) return CircularProgressIndicator();
+//   //         QuerySnapshot query = asyncSnap.data;
+//   //         List<Fruit> fruitList = query.documents.map((doc) => Fruit.fromSnap(doc)).toList();
+//   //         if (fruitList.isEmpty) {return Center(child: Text("All out"));}
+//   //         return ListView.builder(
+//   //       itemCount: fruitList.length,
+//   //       itemBuilder: (context, index){
+//   //         return FruitCard(fruitList[index]);
+//   //       },
+//   //     );
+//   //       },
+//   //     );
       
-  //   }
+//   //   }
 
 
-  @override
-  Widget build(BuildContext context) {
-    // initializeStream();
-
-    
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return new Scaffold(
-      appBar: new AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: new Text(widget.title),
-      ),
-
-      body: Column(
-        children: [
-          Container(
-            height: 400.0,
-            child: Text("Not really used"),//buildListView(),
-          )
-        ]
-      )
-    );
+//   @override
+//   Widget build(BuildContext context) {
+//     // initializeStream();
 
     
-  }
+//     // This method is rerun every time setState is called, for instance as done
+//     // by the _incrementCounter method above.
+//     //
+//     // The Flutter framework has been optimized to make rerunning build methods
+//     // fast, so that you can just rebuild anything that needs updating rather
+//     // than having to individually change instances of widgets.
+//     return new Scaffold(
+//       appBar: new AppBar(
+//         // Here we take the value from the MyHomePage object that was created by
+//         // the App.build method, and use it to set our appbar title.
+//         title: new Text(widget.title),
+//       ),
 
-}
+//       body: Column(
+//         children: [
+//           Container(
+//             height: 400.0,
+//             child: Text("Not really used"),//buildListView(),
+//           )
+//         ]
+//       )
+//     );
 
+    
+//   }
+
+// }
