@@ -5,15 +5,46 @@ import 'package:hackathon_test/classes/user.dart';
 import 'package:hackathon_test/classes/deliveryRequest.dart';
 import 'package:hackathon_test/helper/address.dart';
 import 'package:hackathon_test/main.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+class AddSenderLocation extends StatefulWidget {
+  DeliveryRequest deliveryRequest;
+  AddSenderLocation(this.deliveryRequest);
+  _AddSenderLocationState createState() => _AddSenderLocationState();
+}
+
+class _AddSenderLocationState extends State<AddSenderLocation> {
+  void savePickupLocation(Address value) {
+    widget.deliveryRequest.pickupAddress = value;
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreateDelivery(widget.deliveryRequest),
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Select Sender Location"),
+      ),
+      body: CreateAddress(savePickupLocation),
+    );
+  }
+}
+
 class CreateDelivery extends StatefulWidget {
-  DeliveryRequest deliveryRequest;  
-  CreateDelivery (this.deliveryRequest);
+  DeliveryRequest deliveryRequest;
+  CreateDelivery(this.deliveryRequest);
   _CreateDeliveryState createState() => _CreateDeliveryState();
 }
 
 class _CreateDeliveryState extends State<CreateDelivery> {
-  GeoPoint startGeoPoint;
-  Address startAddress;
+  GeoPoint startGeoPoint = GeoPoint(4.9008044, 114.9286759); //duli
+//  Address startAddress;
+
+  GoogleMapController mapController;
 
   @override
   Widget build(BuildContext context) {
@@ -23,118 +54,153 @@ class _CreateDeliveryState extends State<CreateDelivery> {
         actions: <Widget>[
           FlatButton(
             child: Text("Next"),
-            onPressed: (){
-              Function callback(Address address){
-                this.startAddress = address;
-              }
-              SimpleDialog dialog = SimpleDialog(
-                title: CreateAddress(callback),
-                children: <Widget>[
-                  FlatButton(
-                    child: Text("Save Address"),
-                    onPressed: (){
-                      
-                      // if (this.dialog)//TODO
-                      Navigator.pushReplacement(context,  MaterialPageRoute(
-                        builder: (context) => CreateDelivery2(this.widget.deliveryRequest)));
-                    },
-                  )],
-                
-                
-              );
-              showDialog(child: dialog, barrierDismissible: false,
-              );
-              //todo
-              //Navigator.pushReplacement(context, )
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CreateDelivery2(widget.deliveryRequest)));
             },
           )
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          CreateAddress(callback)
-        ],
-      )//Text("Section1"),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: GoogleMap(
+          onMapCreated: (GoogleMapController controller) {
+            this.mapController = controller;
+            //todo not very efficient, keeps clearning and readding everything
+            this.mapController.addMarker(MarkerOptions(
+                  position: LatLng(this.startGeoPoint.latitude,
+                      this.startGeoPoint.longitude),
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueBlue),
+                ));
+            // debugPrint("lattitude: ${driver.currentLocation.latitude}");
+
+            //todo implement the 10m thing
+            //map will update time ever 10s in the future, otherwise there will be a lot of updates
+          },
+          options: GoogleMapOptions(
+            cameraPosition: CameraPosition(
+              target: LatLng(
+                  startGeoPoint.latitude,
+                  startGeoPoint
+                      .longitude), //camera centres on Progresif HQ by default
+              zoom: 17.0,
+              tilt: 0.0,
+              bearing: 270.0,
+            ),
+            myLocationEnabled: true,
+          ),
+        ),
+      ),
+
+//        body: Column(
+//          children: <Widget>[CreateAddress(callback)],
+//        ) //Text("Section1"),
     );
   }
-
 
   String testing = "placeholder";
-  Function callback(Address address){
+  Function callback(Address address) {
     setState(() {
-          testing = address.toString();
-        });
+      testing = address.toString();
+    });
   }
 }
 
-class AddSenderLocation extends StatefulWidget {
-  DeliveryRequest deliveryRequest;
-  AddSenderLocation(this.deliveryRequest){
-  }
-  _AddSenderLocationState createState() => _AddSenderLocationState();
-}
-
-class _AddSenderLocationState extends State<AddSenderLocation> {
-  void savePickupLocation(Address value){
-    widget.deliveryRequest.pickupAddress = value;
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Select Sender Location"),
-      actions: <Widget>[
-        FlatButton(child: Text("Save"),
-        onPressed: (){
-          Navigator.pushReplacement(context, MaterialPageRoute(
-            builder: (context) => CreateDelivery2(widget.deliveryRequest),
-          ));
-        },)
-      ],),
-      body: CreateAddress(savePickupLocation),
-    );
-  }
-
-  
-}
-
-class Test extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text("Test"),
-    );
-  }
-}
-
-//1 is to 
 class CreateDelivery2 extends StatefulWidget {
   DeliveryRequest deliveryRequest;
-  CreateDelivery2 (this.deliveryRequest);
+  CreateDelivery2(this.deliveryRequest);
   _CreateDelivery2State createState() => _CreateDelivery2State();
 }
 
 class _CreateDelivery2State extends State<CreateDelivery2> {
+  Function callback(Address address) {
+    widget.deliveryRequest.recipientAddress = address;
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                GiveRecipientLocation(widget.deliveryRequest)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Select Pickup Location"),
-        actions: <Widget>[
-          FlatButton(
-            child: Text("Next"),
-            onPressed: (){
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                builder: (context) => SizeAndDistancePage(widget.deliveryRequest)
-              ));
-            },
-          )
-        ],
       ),
-      body: Text("Pickup Location"),
+      body: CreateAddress(callback),
     );
   }
 }
+
+class GiveRecipientLocation extends StatefulWidget {
+  DeliveryRequest deliveryRequest;
+  GiveRecipientLocation(this.deliveryRequest);
+  @override
+  _GiveRecipientLocationState createState() => _GiveRecipientLocationState();
+}
+
+class _GiveRecipientLocationState extends State<GiveRecipientLocation> {
+  GeoPoint endGeopoint = GeoPoint(4.901934, 114.9163313);
+
+  GoogleMapController mapController;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Pin Recipient Location'),
+        actions: <Widget>[
+          FlatButton(
+              child: Text("Next"),
+              onPressed: () {
+                widget.deliveryRequest.recipientAddress.geoPoint = endGeopoint;
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SizeAndDistancePage(widget.deliveryRequest),
+                    ));
+              }),
+        ],
+      ),
+      body: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {
+          this.mapController = controller;
+          //todo not very efficient, keeps clearning and readding everything
+          this.mapController.addMarker(MarkerOptions(
+                position: LatLng(
+                    this.endGeopoint.latitude, this.endGeopoint.longitude),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueBlue),
+              ));
+          // debugPrint("lattitude: ${driver.currentLocation.latitude}");
+
+          //todo implement the 10m thing
+          //map will update time ever 10s in the future, otherwise there will be a lot of updates
+        },
+        options: GoogleMapOptions(
+          cameraPosition: CameraPosition(
+            target: LatLng(
+              endGeopoint.latitude,
+              endGeopoint.longitude,
+            ), //camera centres on Progresif HQ by default
+            zoom: 17.0,
+            tilt: 0.0,
+            bearing: 270.0,
+          ),
+          myLocationEnabled: true,
+        ),
+      ),
+    );
+  }
+}
+
+//1 is to
 
 class SizeAndDistancePage extends StatefulWidget {
   DeliveryRequest deliveryRequest;
@@ -144,46 +210,54 @@ class SizeAndDistancePage extends StatefulWidget {
 
 class _SizeAndDistancePageState extends State<SizeAndDistancePage> {
   num price = 3;
-  
+
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
-      appBar: AppBar(title: Text("Parcel Size"), actions: <Widget>[
-        FlatButton(child: Text("Next"), onPressed: (){
-          if(_formKey.currentState.validate()){
-            _formKey.currentState.save();
-            Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) => CreditCardPage(widget.deliveryRequest)
-            ));
-          }
-        },)
-      ],),
-      body: Form(
-        key: _formKey,
-        child: Column(
-        children: <Widget>[
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: "Description of Package",
-            ),
-            validator: (value){
-              if (value.isEmpty) return "Cannot be empty";
-            },
-            onSaved: (value){
-              widget.deliveryRequest.parcelID = value;
-              widget.deliveryRequest.estimatedPickupTime = DateTime.now().add(Duration(minutes:10));
-            },
+        appBar: AppBar(
+          title: Text("Parcel Size"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Next"),
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  _formKey.currentState.save();
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              CreditCardPage(widget.deliveryRequest)));
+                }
+              },
+            )
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                initialValue: "A cooler box of tuna",
+                decoration: InputDecoration(
+                  labelText: "Description of Package",
+                ),
+                validator: (value) {
+                  if (value.isEmpty) return "Cannot be empty";
+                },
+                onSaved: (value) {
+                  widget.deliveryRequest.parcelID = value;
+                  widget.deliveryRequest.estimatedPickupTime =
+                      DateTime.now().add(Duration(minutes: 10));
+                },
+              ),
+              const SizedBox(
+                height: 32.0,
+              ),
+              Text("Your Total Cost will be $price"),
+            ],
           ),
-          const SizedBox(
-            height: 32.0,
-          ),
-          Text("Your Total Cost will be $price"),
-        ],
-      ),
-    )
-    );
+        ));
   }
 }
 
@@ -197,46 +271,42 @@ class _CreditCardPageState extends State<CreditCardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Checkout"),
-      actions: <Widget>[FlatButton(child: Text("Send Order"),
-      onPressed: (){
-        Navigator.pushReplacementNamed(context, MyApp.mapPageRoute);
-      },
-      )],),
-      body: Column(
-        children: [
+        appBar: AppBar(
+          title: Text("Checkout"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Send Order"),
+              onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ConfirmationPage(widget.deliveryRequest)));
+              },
+            )
+          ],
+        ),
+        body: Column(children: [
           TextFormField(
+            initialValue: "John Doe",
+            decoration: InputDecoration(labelText: "CardHolder Name:"),
+          ),
+          TextFormField(
+            initialValue: "1234 5678 9012 3456",
+            decoration: InputDecoration(labelText: "Credit Card No:"),
+          ),
+          TextFormField(
+            initialValue: "12/22",
             decoration: InputDecoration(
-              labelText: "CardHolder Name:"
+              labelText: "Date of Expiry",
             ),
           ),
           TextFormField(
-          decoration: InputDecoration(
-            labelText: "Credit Card No:",
-          hintText: "1234 5678 9012 3456"
-          ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "Date of Expiry",
-                  hintText: "MM/YY"
-                ),
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "CVV",
-                )
-              )
-            ],
-          )
-        
-        ]
-      )
-     );
-    
+              initialValue: "999",
+              decoration: InputDecoration(
+                labelText: "CVV",
+              ))
+        ]));
   }
 }
 
@@ -247,28 +317,29 @@ class ConfirmationPage extends StatefulWidget {
 }
 
 class _ConfirmationPageState extends State<ConfirmationPage> {
-
-  _ConfirmationPageState(){
-    Firestore.instance.runTransaction((transaction)async{
+  _ConfirmationPageState() {
+    Firestore.instance.runTransaction((transaction) async {
       DocumentReference newRef = DeliveryRequest.colRef.document();
-      transaction.set(newRef, widget.deliveryRequest.toMap());
+      await transaction.set(newRef, widget.deliveryRequest.toMap());
     });
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Confirmation Page"),
-      actions: <Widget>[
-        FlatButton(
-          child: Text("Done"),
-          onPressed: (){
-            Navigator.pushReplacementNamed(context, MyApp.mapPageRoute);
-          },
-        )
-      ],
-    ),
-    body: Center(child: Text("Your Order has been received!\nWe will notify you when a driver has been found."),)
-    );
-
+        appBar: AppBar(
+          title: Text("Confirmation Page"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Done"),
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, MyApp.mapPageRoute);
+              },
+            )
+          ],
+        ),
+        body: Center(
+          child: Text(
+              "Your Order has been received!\nWe will notify you when a driver has been found."),
+        ));
   }
 }
